@@ -195,7 +195,7 @@ class TCPConnection(object):
         msg_header = list()
         shake_hand_time = time.time()
         while self.socketreconnect:
-            if time.time() - shake_hand_time > 12:#获取反馈握手包超时
+            if time.time() - shake_hand_time > 20:#获取反馈握手包超时
                 self.socketreconnect = 0
                 logging.error('没有获取反馈握手包，握手中断')
                 continue
