@@ -69,7 +69,7 @@ do
         fi
     fi
 
-    ping -c 1 8.8.8.8 > /dev/null 2>&1
+    ping -c 1 61.135.169.125 > /dev/null 2>&1
     if [ $? -eq 0 ];then
         status=`ps | grep python | grep /opt/TCPDeviceClient/main.py | grep -v grep | awk '{print $4}'`
         if [ -z $status ]
@@ -84,7 +84,7 @@ do
         fi
         pc=0
     else
-        if [ $pc -gt 1 -a $pc -le 9 ];then
+        if [ $pc -gt 2 -a $pc -le 9 ];then
             pid=`ps | grep python | grep /opt/TCPDeviceClient/main.py | grep -v grep | awk '{print $1}'`
             if test $pid
             then
