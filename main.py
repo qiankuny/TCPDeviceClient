@@ -2,6 +2,7 @@
 #_*_coding:utf-8_*_
 
 import TCPConnection
+import ReportLog
 import socket, time, struct, threading
 import uuid
 import inspect
@@ -11,6 +12,7 @@ from logging.handlers import TimedRotatingFileHandler
 import re
 import sys, os
 import mod_config
+import ProgramUpgrade
 
 def daemonize(stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
     try:
@@ -77,19 +79,33 @@ if __name__ == "__main__":
                 logging.error('登录异常: %s', e)
                 continue
             if loginresult == 0:
+                signal = threading.Event()
+                signal.set()
+                # 检测握手心跳
                 sh = threading.Thread(target=tcpc.shakeHand)
                 sh.start()
+                # 检查开门并上报门磁状态
                 ds = threading.Thread(target=tcpc.reportDoorStatus)
                 ds.start()
                 tr = threading.Thread(target=tcpc.threadRecv)
                 tr.start()
                 logging.info('start %s', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+                # 上报日志线程
+                report = ReportLog.ReportLog()
+                re = threading.Thread(target=report.report, args=(signal,))
+                re.start()
+                # 更新程序
+                program = ProgramUpgrade.ProgramUpgrade()
+                pu = threading.Thread(target=program.main, args=(signal,))
+                pu.start()
                 while True:
                     try:
                         if tcpc.socketreconnect == 0:
+                            signal.clear()
                             sock.close()
                             break
                     except:
+                        signal.clear()
                         sock.close()
                         break
             elif loginresult == 1:

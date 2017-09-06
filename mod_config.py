@@ -13,3 +13,15 @@ def getConfig(section, key):
         return config.get(section, key)
     except:
         return False
+
+#修改config配置文件
+def setConfig(section, key, value):
+    config = ConfigParser.ConfigParser()
+    path = os.path.split(os.path.realpath(__file__))[0] + '/config.conf'
+    config.read(path)
+    try:
+        config.set(section, key, value)
+        config.write(open(path, 'w'))
+        return True
+    except:
+        return False

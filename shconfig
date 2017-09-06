@@ -1,0 +1,3 @@
+###shell配置文件###
+#!/bin/sh
+netcard=ra0

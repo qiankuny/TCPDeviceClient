@@ -34,7 +34,7 @@ class TCPConnection(object):
         head.iFeedBack = 1
         login = tp.LoginAuth()
         login.cDeviceID = self.deviceid
-        login.cVersion = '3.2'
+        login.cVersion = mod_config.getConfig("device", "version")#版本号
         login.cDeviceIP = self.deviceip
         login.iListenPort = self.listenport
         self.sock.sendall(head.pack() + login.pack())
@@ -109,9 +109,9 @@ class TCPConnection(object):
                         arrs.append(int(p[0]))
                     time.sleep(0.01)
                 if 0 in arrs:
-                    x = int(mod_config.getConfig("device", "doorclosestatus"))
+                    x = int(mod_config.getConfig("device", "doorclosestatus"))#关门状态
                 else:
-                    x = int(mod_config.getConfig("device", "dooropenstatus"))
+                    x = int(mod_config.getConfig("device", "dooropenstatus"))#开门状态
                 if y != x:
                     y = x
                     head = tp.MsgHead()
@@ -126,7 +126,7 @@ class TCPConnection(object):
                     self.sockSend(head.pack() + status.pack())
                     if y == 1:
                         opentime = time.time()
-                    os.system('echo 1 > /dev/gpio-P1.24')  # 上锁
+                    os.system('echo '+str(mod_config.getConfig("device", "lockstatus"))+' > /dev/gpio-P1.24')  # 上锁
                     if y == 0 and self.isgivealarm == 1 and self.givealarmtime >= 1:
                         self.givealarmtime = 0
                     if int(mod_config.getConfig("device", "isvideo")) == 1:#是否录像
@@ -249,8 +249,8 @@ class TCPConnection(object):
         os.system('echo 1 > /sys/class/leds/beep/brightness')
         time.sleep(0.2)
         os.system('echo 0 > /sys/class/leds/beep/brightness')
-        os.system('echo 0 > /dev/gpio-P1.24')#开锁
-        self.autolocktime = int(mod_config.getConfig("device", "autolocktime"))
+        os.system('echo '+str(mod_config.getConfig("device", "unlockstatus"))+' > /dev/gpio-P1.24')#开锁
+        self.autolocktime = int(mod_config.getConfig("device", "autolocktime"))#开锁保持时长
         self.resetautolock = resetautolock = time.time()#标记最新开锁时间
         head = tp.MsgHead()
         head.iMsgType = tp.MsgTypeEnum.DEVICE_CONTROL
@@ -268,7 +268,7 @@ class TCPConnection(object):
             self.autolocktime = self.autolocktime - 1
             time.sleep(1)
         if resetautolock == self.resetautolock:
-            os.system('echo 1 > /dev/gpio-P1.24')#上锁
+            os.system('echo '+str(mod_config.getConfig("device", "lockstatus"))+' > /dev/gpio-P1.24')#上锁
             self.outLockStatusReport(0)
 
     #锁状态上报
@@ -292,9 +292,9 @@ class TCPConnection(object):
                     arrs.append(int(p[0]))
                 time.sleep(0.01)
             if 0 in arrs:
-                x = int(mod_config.getConfig("device", "doorclosestatus"))
+                x = int(mod_config.getConfig("device", "doorclosestatus"))#关门状态
             else:
-                x = int(mod_config.getConfig("device", "dooropenstatus"))
+                x = int(mod_config.getConfig("device", "dooropenstatus"))#开门状态
             status.iInputStatus[0] = ct.c_int32(x)
             if data == 1:
                 status.iOutputStatus[0] = ct.c_int32(1)
